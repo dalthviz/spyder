@@ -120,7 +120,8 @@ class SpyderKernelSpec(KernelSpec):
             'SPY_GREEDY_O': CONF.get('ipython_console', 'greedy_completer'),
             'SPY_JEDI_O': CONF.get('ipython_console', 'jedi_completer'),
             'SPY_SYMPY_O': CONF.get('ipython_console', 'symbolic_math'),
-            'SPY_TESTING': running_under_pytest() or SAFE_MODE
+            'SPY_TESTING': running_under_pytest() or SAFE_MODE,
+            'SPY_SHOW_CMD': CONF.get('ipython_console', 'subprocess_window')
         }
 
         if self.is_pylab is True:
