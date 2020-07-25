@@ -1,0 +1,13 @@
+name: Spyder
+company: Spyder Contributors
+version: 4.1.4
+install_in_dependency_order: True
+channels:
+- http://repo.continuum.io/pkgs/main/
+specs:
+- python 3.7*
+- spyder
+license_file: LICENSE.txt
+welcome_image: welcome_spyder.png [win]
+header_image: header_spyder.png [win]
+icon_image: icon_spyder.ico [win]
