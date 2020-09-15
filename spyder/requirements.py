@@ -10,6 +10,19 @@ import sys
 import os.path as osp
 from distutils.version import LooseVersion
 
+try:
+    from importlib import metadata as importlib_metadata
+except ImportError:
+    import importlib_metadata  # type: ignore
+
+
+def running_as_bundled_app():
+    """Infer whether we are running as a briefcase bundle"""
+    # https://github.com/beeware/briefcase/issues/412
+    # https://github.com/beeware/briefcase/pull/425
+    # this assumes the name of the app stays "napari"
+    return importlib_metadata.metadata("spyder").get("App-ID") is not None
+
 
 def show_warning(message):
     """Show warning using Tkinter if available"""
@@ -28,10 +41,13 @@ def check_path():
     """Check sys.path: is Spyder properly installed?"""
     dirname = osp.abspath(osp.join(osp.dirname(__file__), osp.pardir))
     if dirname not in sys.path:
-        show_warning("Spyder must be installed properly "
-                     "(e.g. from source: 'python setup.py install'),\n"
-                     "or directory '%s' must be in PYTHONPATH "
-                     "environment variable." % dirname)
+        if running_as_bundled_app():
+            sys.path.append(dirname)
+        else:
+            show_warning("Spyder must be installed properly "
+                         "(e.g. from source: 'python setup.py install'),\n"
+                         "or directory '%s' must be in PYTHONPATH "
+                         "environment variable." % dirname)
 
 
 def check_qt():

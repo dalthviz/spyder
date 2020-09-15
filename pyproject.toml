@@ -1,0 +1,50 @@
+[tool.briefcase]
+project_name = "spyder"
+bundle = "org.spyder-ide"
+author = "Spyder contributors"
+url = "https://spyder-ide.org/"
+license = "MIT license"
+version = "0.0.1"
+
+[tool.briefcase.app.spyder]
+formal_name = "spyder"
+description = "Spyder: The Scientific PYthon Development EnviRonment"
+sources = ['spyder']
+icon = "img_src/spyder"
+installer_icon = "img_src/spyder"
+requires = [
+    'applaunchservices>=0.1.7;platform_system=="Darwin"',
+    'atomicwrites>=1.2.0',
+    'chardet>=2.0.0',
+    'cloudpickle>=0.5.0',
+    'diff-match-patch>=20181111',
+    'intervaltree',
+    'ipython>=4.0',
+    'jedi==0.17.1',
+    # Don't require keyring for Python 2 and Linux
+    # because it depends on system packages
+    'keyring;sys_platform!="linux2"',
+    'nbconvert>=4.0',
+    'numpydoc>=0.6.0',
+    # Required to get SSH connections to remote kernels
+    'paramiko>=2.4.0;platform_system=="Windows"',
+    'parso==0.7.0',
+    'pexpect>=4.4.0',
+    'pickleshare>=0.4',
+    'psutil>=5.3',
+    'pygments>=2.0',
+    'pylint>=1.0',
+    'pyqt5<5.13;python_version>="3"',
+    'pyqtwebengine<5.13;python_version>="3"',
+    'python-language-server[all]>=0.34.0,<1.0.0',
+    'pyxdg>=0.26;platform_system=="Linux"',
+    'pyzmq>=17',
+    'qdarkstyle>=2.8',
+    'qtawesome>=0.5.7',
+    'qtconsole>=4.6.0',
+    'qtpy>=1.5.0',
+    'sphinx>=0.6.6',
+    'spyder-kernels>=1.9.4,<1.10.0',
+    'watchdog',
+]
+
