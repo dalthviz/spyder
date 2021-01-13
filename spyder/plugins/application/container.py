@@ -7,41 +7,63 @@
 """
 Container Widget.
 
-Holds references for base actions in the Main Menu of Spyder.
+Holds references for base actions in the Application of Spyder.
 """
 
+# Standard library imports
+import os
+
 # Third party imports
-from qtpy.QtCore import QThread, Slot
+from qtpy.QtCore import Qt, QThread, Slot
 from qtpy.QtWidgets import QMessageBox
 
 # Local imports
-from spyder import __project_url__
+from spyder import (
+    __docs_url__, __forum_url__, __project_url__, __trouble_url__)
 from spyder import dependencies
 from spyder.api.translations import get_translation
 from spyder.api.widgets import PluginMainContainer
 from spyder.config.base import DEV
 from spyder.config.utils import is_anaconda
+from spyder.utils.qthelpers import start_file, DialogManager
 from spyder.widgets.about import AboutDialog
 from spyder.widgets.dependencies import DependenciesDialog
 from spyder.widgets.helperwidgets import MessageCheckBox
 from spyder.workers.updates import WorkerUpdates
 
+WinUserEnvDialog = None
+if os.name == 'nt':
+    from spyder.utils.environ import WinUserEnvDialog
 
 # Localization
 _ = get_translation('spyder')
 
 
 # Actions
-class MainMenuActions:
+class ApplicationActions:
+    # Documentation related
+    SpyderDocumentationAction = "spyder documentation"
+    SpyderDocumentationVideoAction = "spyder_documentation_video_action"
+
     # Support
+    SpyderTroubleshootingAction = "spyder_troubleshooting_action"
     SpyderDependenciesAction = "spyder_dependencies_action"
     SpyderCheckUpdatesAction = "spyder_check_updates_action"
+    SpyderSupportAction = "spyder_support_action"
 
     # About
     SpyderAbout = "spyder_about_action"
 
+    # Tools
+    SpyderWindowsEnvVariables = "spyder_windows_env_variables_action"
 
-class MainMenuContainer(PluginMainContainer):
+    # File
+    # The name of the action needs to match name of the shortcut
+    # so 'Restart' is used instead of something like 'restart_action'
+    SpyderRestart = "Restart"
+
+
+class ApplicationContainer(PluginMainContainer):
 
     DEFAULT_OPTIONS = {
         'check_updates_on_startup': True
@@ -49,25 +71,69 @@ class MainMenuContainer(PluginMainContainer):
 
     def setup(self, options=DEFAULT_OPTIONS):
         # Attributes
+        self.dialog_manager = DialogManager()
         self.give_updates_feedback = False
         self.thread_updates = None
         self.worker_updates = None
 
         # Actions
-        self.check_updates_action = self.create_action(
-            MainMenuActions.SpyderCheckUpdatesAction,
-            _("Check for updates..."),
-            triggered=self.check_updates)
+        # Documentation actions
+        self.documentation_action = self.create_action(
+            ApplicationActions.SpyderDocumentationAction,
+            text=_("Spyder documentation"),
+            icon=self.create_icon("DialogHelpButton"),
+            triggered=lambda: start_file(__docs_url__),
+            context=Qt.ApplicationShortcut,
+            register_shortcut=True,
+            shortcut_context="_")
+
+        spyder_video_url = ("https://www.youtube.com/playlist"
+                            "?list=PLPonohdiDqg9epClEcXoAPUiK0pN5eRoc")
+        self.video_action = self.create_action(
+            ApplicationActions.SpyderDocumentationVideoAction,
+            text=_("Tutorial videos"),
+            icon=self.create_icon("VideoIcon"),
+            triggered=lambda: start_file(spyder_video_url))
+
+        # Support actions
+        self.trouble_action = self.create_action(
+            ApplicationActions.SpyderTroubleshootingAction,
+            _("Troubleshooting..."),
+            triggered=lambda: start_file(__trouble_url__))
         self.dependencies_action = self.create_action(
-            MainMenuActions.SpyderDependenciesAction,
+            ApplicationActions.SpyderDependenciesAction,
             _("Dependencies..."),
             triggered=self.show_dependencies,
             icon=self.create_icon('advanced'))
+        self.check_updates_action = self.create_action(
+            ApplicationActions.SpyderCheckUpdatesAction,
+            _("Check for updates..."),
+            triggered=self.check_updates)
+        self.support_group_action = self.create_action(
+            ApplicationActions.SpyderSupportAction,
+            _("Spyder support..."),
+            triggered=lambda: start_file(__forum_url__))
+
+        # About action
         self.about_action = self.create_action(
-            MainMenuActions.SpyderAbout,
+            ApplicationActions.SpyderAbout,
             _("About %s...") % "Spyder",
             icon=self.create_icon('MessageBoxInformation'),
             triggered=self.show_about)
+
+        # Tools actions
+        if WinUserEnvDialog is not None:
+            self.winenv_action = self.create_action(
+                ApplicationActions.SpyderWindowsEnvVariables,
+                _("Current user environment variables..."),
+                icon=self.create_icon('win_env.png', image_file=True),
+                tip=_("Show and edit current user environment "
+                      "variables in Windows registry "
+                      "(i.e. for all sessions)"),
+                triggered=self.show_windows_env_variables)
+        else:
+            self.winenv_action = None
+
 
         # Initialize
         if DEV is None and options.get('main', 'check_updates_on_startup'):
@@ -79,6 +145,9 @@ class MainMenuContainer(PluginMainContainer):
 
     def update_actions(self):
         pass
+
+    def on_close(self):
+        self.dialog_manager.close_all()
 
     def _check_updates_ready(self):
         """Show results of the Spyder update checking process."""
@@ -164,7 +233,6 @@ class MainMenuContainer(PluginMainContainer):
     @Slot()
     def check_updates(self, startup=False):
         """Check for spyder updates on github releases using a QThread."""
-
         # Disable check_updates_action while the thread is working
         self.check_updates_action.setDisabled(True)
 
@@ -191,3 +259,8 @@ class MainMenuContainer(PluginMainContainer):
         """Show Spyder About dialog."""
         abt = AboutDialog(self)
         abt.show()
+
+    @Slot()
+    def show_windows_env_variables(self):
+        """Show Windows current user environment variables."""
+        self.dialog_manager.show(WinUserEnvDialog(self))
