@@ -66,7 +66,24 @@ class ApplicationActions:
 class ApplicationContainer(PluginMainContainer):
 
     DEFAULT_OPTIONS = {
-        'check_updates_on_startup': True
+        # Screen resolution section
+        'normal_screen_resolution': True,
+        'high_dpi_scaling': False,
+        'high_dpi_custom_scale_factor': False,
+        'high_dpi_custom_scale_factors': '1.5',
+        # Panes section
+        'vertical_tabs': False,
+        'use_custom_margin': True,
+        'custom_margin': 0,
+        'use_custom_cursor_blinking': False,
+        'custom_cursor_blinking': 0,
+        # Advanced tab
+        'interface_language': 'en',
+        'opengl': 'software',
+        'single_instance': True,
+        'prompt_on_exit': False,
+        'check_updates_on_startup': True,
+        'show_internal_errors': True,
     }
 
     def setup(self, options=DEFAULT_OPTIONS):

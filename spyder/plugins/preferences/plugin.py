@@ -25,8 +25,7 @@ from spyder.api.plugins import SpyderPluginV2, SpyderPlugin
 from spyder.config.base import _
 from spyder.config.main import CONF_VERSION
 from spyder.config.user import NoDefault
-from spyder.plugins.preferences.api import PreferencePages, GeneralConfigPage
-from spyder.plugins.preferences.general import MainConfigPage
+from spyder.plugins.preferences.api import GeneralConfigPage
 from spyder.plugins.preferences.widgets.container import PreferencesContainer
 
 logger = logging.getLogger(__name__)
@@ -56,10 +55,10 @@ class Preferences(SpyderPluginV2):
     def __init__(self, parent, configuration=None):
         super().__init__(parent, configuration)
         self.config_pages = {
-            PreferencePages.General: (self.NEW_API,
-                                      lambda plugin, dlg: MainConfigPage(
-                                          dlg, plugin),
-                                      self.get_main())
+            # PreferencePages.General: (self.NEW_API,
+            #                           lambda plugin, dlg: MainConfigPage(
+            #                               dlg, plugin),
+            #                           self.get_main())
         }
         self.config_tabs = {}
 

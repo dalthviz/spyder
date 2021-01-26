@@ -26,6 +26,8 @@ from spyder.plugins.application.container import (
     ApplicationActions, ApplicationContainer, WinUserEnvDialog)
 from spyder.plugins.mainmenu.api import (
     ApplicationMenus, FileMenuSections, HelpMenuSections, ToolsMenuSections)
+from spyder.plugins.preferences.api import PreferencePages
+from spyder.plugins.preferences.general import MainConfigPage
 from spyder.utils.qthelpers import add_actions
 
 # Localization
@@ -35,13 +37,33 @@ _ = get_translation('spyder')
 class Application(SpyderPluginV2):
     NAME = 'application'
     REQUIRES = [Plugins.Console]
-    OPTIONAL = [Plugins.Help, Plugins.MainMenu, Plugins.Shortcuts]
+    OPTIONAL = [Plugins.Help, Plugins.MainMenu, Plugins.Preferences,
+                Plugins.Shortcuts]
     CONTAINER_CLASS = ApplicationContainer
     CONF_SECTION = NAME
     CONF_FILE = False
     CONF_FROM_OPTIONS = {
+        # Screen resolution section
+        'normal_screen_resolution': ('main', 'normal_screen_resolution'),
+        'high_dpi_scaling': ('main', 'high_dpi_scaling'),
+        'high_dpi_custom_scale_factor': ('main',
+                                         'high_dpi_custom_scale_factor'),
+        'high_dpi_custom_scale_factors': ('main',
+                                          'high_dpi_custom_scale_factors'),
+        # Panes section
+        'vertical_tabs': ('main', 'vertical_tabs'),
+        'use_custom_margin': ('main', 'use_custom_margin'),
+        'custom_margin': ('main', 'custom_margin'),
+        'use_custom_cursor_blinking': ('main', 'use_custom_cursor_blinking'),
+        # Advanced settings
+        'opengl': ('main', 'opengl'),
+        'single_instance': ('main', 'single_instance'),
+        'prompt_on_exit': ('main', 'prompt_on_exit'),
         'check_updates_on_startup': ('main', 'check_updates_on_startup'),
+        'show_internal_errors': ('main', 'show_internal_errors'),
     }
+    CONF_WIDGET_CLASS = MainConfigPage
+    # ADDITIONAL_CONF_OPTIONS = {'section': PreferencePages.General}
 
     def get_name(self):
         return _('Application')
@@ -53,6 +75,10 @@ class Application(SpyderPluginV2):
         return _('Provide main application base actions.')
 
     def register(self):
+        # Register with Preferences plugin
+        preferences = self.get_plugin(Plugins.Preferences)
+        preferences.register_plugin_preferences(self)
+
         # Application base actions (that interact directly with other
         # plugins). For other actions see ./container.py
         self.restart_action = self.create_action(
@@ -69,6 +95,7 @@ class Application(SpyderPluginV2):
         self._populate_file_menu()
         self._populate_tools_menu()
         self._populate_help_menu()
+
 
     def on_close(self):
         self.get_container().on_close()
