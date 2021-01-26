@@ -1013,7 +1013,7 @@ class Editor(SpyderPluginWidget):
         # Navigation
         if sys.platform == 'darwin':
             self.main.mainmenu.add_item_to_application_menu(
-                self.editor.tab_navigation_actions,
+                self.tab_navigation_actions,
                 menu_id=ApplicationMenus.File,
                 section=FileMenuSections.Navigation,
                 before_section=FileMenuSections.Restart)
