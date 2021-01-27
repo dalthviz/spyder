@@ -95,7 +95,6 @@ class Application(SpyderPluginV2):
         self._populate_tools_menu()
         self._populate_help_menu()
 
-
     def on_close(self):
         self.get_container().on_close()
 
