@@ -54,12 +54,7 @@ class Preferences(SpyderPluginV2):
 
     def __init__(self, parent, configuration=None):
         super().__init__(parent, configuration)
-        self.config_pages = {
-            # PreferencePages.General: (self.NEW_API,
-            #                           lambda plugin, dlg: MainConfigPage(
-            #                               dlg, plugin),
-            #                           self.get_main())
-        }
+        self.config_pages = {}
         self.config_tabs = {}
 
     def register_plugin_preferences(
@@ -86,7 +81,7 @@ class Preferences(SpyderPluginV2):
                         new_value = conf_keys[conf_key]
                         self.check_version_and_merge(
                             conf_section, conf_key, new_value,
-                            plugin_conf_version)
+                            plugin_conf_version, plugin)
 
             # Check if the plugin declares any additional configuration tabs
             if plugin.ADDITIONAL_CONF_TABS is not None:
@@ -106,9 +101,9 @@ class Preferences(SpyderPluginV2):
             self.config_pages[plugin.CONF_SECTION] = (
                 self.OLD_API, Widget, plugin)
 
-    def check_version_and_merge(conf_section: str, conf_key: str,
+    def check_version_and_merge(self, conf_section: str, conf_key: str,
                                 new_value: BasicType,
-                                current_version: Version):
+                                current_version: Version, plugin):
         """Add a versioned additional option to a configuration section."""
         current_value = self.get_conf_option(conf_key, section=conf_section)
         section_additional = self.get_conf_option('additional_configuration',
@@ -123,8 +118,8 @@ class Preferences(SpyderPluginV2):
 
             allow_replacement = current_version > prev_version
             allow_deletions = current_version.major > prev_version.major
-            new_value = merge_defaults(prev_default, new_value,
-                                       allow_replacement, allow_deletions)
+            new_value = self.merge_defaults(prev_default, new_value,
+                                            allow_replacement, allow_deletions)
             new_default = new_value
 
             if current_value != NoDefault:
@@ -173,7 +168,7 @@ class Preferences(SpyderPluginV2):
                 if new_key in prev_default:
                     current_subvalue = prev_default[new_key]
                     new_subvalue = new_default[new_key]
-                    prev_default[new_key] = merge_defaults(
+                    prev_default[new_key] = self.merge_defaults(
                         current_subvalue, new_subvalue,
                         allow_replacement, allow_deletions)
                 else:
@@ -200,7 +195,7 @@ class Preferences(SpyderPluginV2):
         Recursively match and merge a new configuration value into a
         previous one.
         """
-        current_type = type(current_type)
+        current_type = type(current_value)
         new_type = type(new_value)
         iterable_types = {list, tuple}
         base_types = {int, float, bool, complex, str, bytes}
@@ -211,7 +206,7 @@ class Preferences(SpyderPluginV2):
                 if new_key in current_value:
                     current_subvalue = current_value[new_key]
                     new_subvalue = new_value[new_key]
-                    current_value[new_key] = merge_configurations(
+                    current_value[new_key] = self.merge_configurations(
                         current_subvalue, new_subvalue)
                 else:
                     current_value[new_key] = new_value[new_key]

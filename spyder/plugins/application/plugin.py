@@ -63,7 +63,6 @@ class Application(SpyderPluginV2):
         'show_internal_errors': ('main', 'show_internal_errors'),
     }
     CONF_WIDGET_CLASS = MainConfigPage
-    # ADDITIONAL_CONF_OPTIONS = {'section': PreferencePages.General}
 
     def get_name(self):
         return _('Application')
