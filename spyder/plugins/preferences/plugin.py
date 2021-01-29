@@ -25,7 +25,6 @@ from spyder.api.plugins import SpyderPluginV2, SpyderPlugin
 from spyder.config.base import _
 from spyder.config.main import CONF_VERSION
 from spyder.config.user import NoDefault
-from spyder.plugins.preferences.api import GeneralConfigPage
 from spyder.plugins.preferences.widgets.container import PreferencesContainer
 
 logger = logging.getLogger(__name__)
@@ -63,9 +62,6 @@ class Preferences(SpyderPluginV2):
                 plugin.CONF_WIDGET_CLASS is not None):
             # New API
             Widget = plugin.CONF_WIDGET_CLASS
-            if issubclass(plugin.CONF_WIDGET_CLASS, GeneralConfigPage):
-                Widget = lambda plugin, dlg: plugin.CONF_WIDGET_CLASS(
-                    dlg, plugin)
 
             self.config_pages[plugin.NAME] = (self.NEW_API, Widget, plugin)
 
@@ -95,9 +91,7 @@ class Preferences(SpyderPluginV2):
                 plugin.CONFIGWIDGET_CLASS is not None):
             # Old API
             Widget = plugin.CONFIGWIDGET_CLASS
-            if issubclass(plugin.CONFIGWIDGET_CLASS, GeneralConfigPage):
-                Widget = lambda plugin, dlg: plugin.CONFIGWIDGET_CLASS(
-                    dlg, plugin)
+
             self.config_pages[plugin.CONF_SECTION] = (
                 self.OLD_API, Widget, plugin)
 

@@ -22,12 +22,11 @@ from spyder.api.plugins import Plugins, SpyderPluginV2
 from spyder.api.translations import get_translation
 from spyder.api.widgets.menus import MENU_SEPARATOR
 from spyder.config.base import DEV, get_module_path
+from spyder.plugins.application.confpage import ApplicationConfigPage
 from spyder.plugins.application.container import (
     ApplicationActions, ApplicationContainer, WinUserEnvDialog)
 from spyder.plugins.mainmenu.api import (
     ApplicationMenus, FileMenuSections, HelpMenuSections, ToolsMenuSections)
-from spyder.plugins.preferences.api import PreferencePages
-from spyder.plugins.preferences.general import MainConfigPage
 from spyder.utils.qthelpers import add_actions
 
 # Localization
@@ -40,7 +39,7 @@ class Application(SpyderPluginV2):
     OPTIONAL = [Plugins.Help, Plugins.MainMenu, Plugins.Preferences,
                 Plugins.Shortcuts]
     CONTAINER_CLASS = ApplicationContainer
-    CONF_SECTION = NAME
+    CONF_SECTION = 'main'
     CONF_FILE = False
     CONF_FROM_OPTIONS = {
         # Screen resolution section
@@ -62,7 +61,7 @@ class Application(SpyderPluginV2):
         'check_updates_on_startup': ('main', 'check_updates_on_startup'),
         'show_internal_errors': ('main', 'show_internal_errors'),
     }
-    CONF_WIDGET_CLASS = MainConfigPage
+    CONF_WIDGET_CLASS = ApplicationConfigPage
 
     def get_name(self):
         return _('Application')
@@ -197,6 +196,10 @@ class Application(SpyderPluginV2):
         add_actions(menu, actions)
 
         return menu
+
+    def apply_settings(self):
+        """Apply applications settings."""
+        self._main.apply_settings()
 
     @Slot()
     def restart(self, reset=False):

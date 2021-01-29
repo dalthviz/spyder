@@ -153,7 +153,7 @@ class ApplicationContainer(PluginMainContainer):
 
 
         # Initialize
-        if DEV is None and options.get('main', 'check_updates_on_startup'):
+        if DEV is None and options.get('check_updates_on_startup'):
             self.give_updates_feedback = False
             self.check_updates(startup=True)
 
