@@ -20,6 +20,7 @@ from spyder.api.translations import get_translation
 from spyder.api.widgets.status import BaseTimerStatus
 from spyder.config.base import is_pynsist, running_in_mac_app
 from spyder.utils.conda import get_list_conda_envs
+from spyder.utils.icon_manager import ima
 from spyder.utils.programs import get_interpreter_info
 from spyder.utils.pyenv import get_list_pyenv_envs
 from spyder.utils.workers import WorkerManager
@@ -69,6 +70,9 @@ class InterpreterStatus(BaseTimerStatus):
         self.get_envs()
 
     # ---- BaseTimerStatus API
+    def get_icon(self):
+        return ima.icon('python')
+
     def get_value(self):
         """
         Switch to default interpreter if current env was removed or
