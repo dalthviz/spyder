@@ -289,7 +289,7 @@ class LSPMixin:
         self.will_save_until_notify = sync_options.get(
             "willSaveWaitUntil", False
         )
-        self.save_include_text = sync_options["save"]["includeText"]
+        self.save_include_text = sync_options.get("save", {"includeText": False})["includeText"]
         self.enable_hover = capabilities["hoverProvider"]
         self.folding_supported = capabilities.get(
             "foldingRangeProvider", False

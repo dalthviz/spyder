@@ -21,14 +21,15 @@ import sys
 import time
 
 # Third-party imports
-from qtpy.QtCore import QObject, QProcess, QSocketNotifier, Signal, Slot
+from qtpy.QtCore import QObject, QProcess, QSocketNotifier, Qt, Signal, Slot
+from qtpy.QtWidgets import QMessageBox
 import zmq
 import psutil
 
 # Local imports
 from spyder.api.config.mixins import SpyderConfigurationAccessor
 from spyder.config.base import (
-    DEV, get_conf_path, get_debug_level, is_conda_based_app,
+    _, DEV, get_conf_path, get_debug_level, is_conda_based_app,
     running_under_pytest)
 from spyder.config.utils import is_anaconda
 from spyder.plugins.completion.api import (
@@ -569,6 +570,81 @@ class LSPClient(QObject, LSPMethodProviderMixIn, SpyderConfigurationAccessor):
         }
         return params
 
+    @send_request(method="setEditorInfo")
+    def set_editor_info(self):
+        params = {
+            "editorInfo": {
+                "name": "Spyder",
+                "version": "5.5.0dev0",
+            },
+            "editorPluginInfo": {
+                "name": "languageserver",
+                "version": "0.2.0",
+            },
+        }
+        return params
+
+    @handles("setEditorInfo")
+    def handle_set_editor_info(self, response, *args):
+        logger.info(response)
+
+    @send_request(method="checkStatus")
+    def check_status(self):
+        params = {}
+        return params
+
+    @handles("checkStatus")
+    def handle_check_status(self, response, *args):
+        logger.info(response)
+        self.set_editor_info()
+        if response["status"] == "NotSignedIn":
+            self.sign_in_initiate()
+
+    @send_request(method="signInInitiate")
+    def sign_in_initiate(self):
+        params = {}
+        return params
+
+    @handles("signInInitiate")
+    def handle_sign_in_initiate(self, response, *args):
+        logger.info(response)
+        if response["status"] == "PromptUserDeviceFlow":
+            verification_uri = response["verificationUri"]
+            user_code = response["userCode"]
+            msg_box = QMessageBox(
+                QMessageBox.Information,
+                "Sign In",
+                _("Before proceeding you need to sign in! "
+                  "Please go to "
+                  "<a href={verification_uri}>{verification_uri}</a> "
+                  "and enter the following code:<br><br>{user_code}<br><br>"
+                  "After that, you can close this dialog "
+                  "to continue with the setup"
+                  ).format(
+                    verification_uri=verification_uri,
+                    user_code=user_code
+                    ),
+                QMessageBox.Ok
+            )
+            msg_box.setTextFormat(Qt.RichText)
+            msg_box.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            msg_box.exec()
+
+            if msg_box == QMessageBox.Ok:
+                self.sign_in_confirm(user_code)
+        else:
+            self.check_status()
+
+    @send_request(method="signInConfirm")
+    def sign_in_confirm(self, user_code):
+        params = {"userCode": user_code}
+        return params
+
+    @handles("signInConfirm")
+    def handle_sign_in_confirm(self, response, *args):
+        logger.info(response)
+        self.check_status()
+
     @send_request(method=CompletionRequestTypes.SHUTDOWN)
     def shutdown(self):
         params = {}
@@ -609,6 +685,9 @@ class LSPClient(QObject, LSPMethodProviderMixIn, SpyderConfigurationAccessor):
         # This sends a DidChangeConfiguration request to pass to the server
         # the configurations set by the user in our config system.
         self.send_configurations(self.configurations)
+
+        # Sign In flow for copilot like servers
+        self.sign_in_initiate()
 
         # Inform other plugins that the server is up.
         self.sig_initialize.emit(self.server_capabilites, self.language)
