@@ -29,7 +29,8 @@ from spyder.config.lsp import PYTHON_CONFIG
 from spyder.utils.misc import check_connection_port
 from spyder.plugins.completion.api import (SUPPORTED_LANGUAGES,
                                            SpyderCompletionProvider,
-                                           WorkspaceUpdateKind)
+                                           WorkspaceUpdateKind,
+                                           CompletionRequestTypes)
 from spyder.plugins.completion.providers.languageserver.client import LSPClient
 from spyder.plugins.completion.providers.languageserver.conftabs import TABS
 from spyder.plugins.completion.providers.languageserver.widgets import (
@@ -691,6 +692,13 @@ class LanguageServerProvider(SpyderCompletionProvider):
                 self.COMPLETION_PROVIDER_NAME, req_id, response)
 
     def send_request(self, language, request, params, req_id):
+        if request == CompletionRequestTypes.DOCUMENT_COMPLETION and language == "html":
+            self.requests.add(req_id)
+            client = self.clients["html"]['instance']
+            params['response_callback'] = functools.partial(
+                self.receive_response, language=language, req_id=req_id)
+            client.perform_request("getCompletions", params)
+            return
         if language in self.clients:
             language_client = self.clients[language]
             if language_client['status'] == self.RUNNING:

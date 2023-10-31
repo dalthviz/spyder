@@ -650,6 +650,37 @@ class LSPMixin:
 
     # ---- Completion
     # -------------------------------------------------------------------------
+    @schedule_request(method="getCompletions")
+    def get_completions(self):
+        cursor = self.textCursor()
+        current_word = self.get_current_word(
+            completion=True, valid_python_variable=False
+        )
+        params = {
+            "doc": {
+                "source": current_word,
+                "tabSize": 4,
+                "indentSize": 1,  # there is no such concept in ST
+                "insertSpaces": True,
+                "path": self.filename,
+                "uri": self.filename,
+                # "relativePath": get_project_relative_path(file_path),
+                "languageId": self.language,
+                "position": {
+                    "line": cursor.blockNumber(),
+                    "character": cursor.columnNumber()
+                },
+                # Buffer Version. Generally this is handled by LSP, but we need to handle it here
+                # Will need to test getting the version from LSP
+                # "version": view.change_count(),
+            }
+        }
+        return params
+
+    @handles("getCompletions")
+    def handle_get_completions(self, response, *args):
+        logger.info(response)
+
     @schedule_request(method=CompletionRequestTypes.DOCUMENT_COMPLETION)
     def do_completion(self, automatic=False):
         """Trigger completion."""

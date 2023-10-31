@@ -687,7 +687,8 @@ class LSPClient(QObject, LSPMethodProviderMixIn, SpyderConfigurationAccessor):
         self.send_configurations(self.configurations)
 
         # Sign In flow for copilot like servers
-        self.sign_in_initiate()
+        if self.language == "html":
+            self.sign_in_initiate()
 
         # Inform other plugins that the server is up.
         self.sig_initialize.emit(self.server_capabilites, self.language)
