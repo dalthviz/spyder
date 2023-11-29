@@ -645,6 +645,32 @@ class LSPClient(QObject, LSPMethodProviderMixIn, SpyderConfigurationAccessor):
         logger.info(response)
         self.check_status()
 
+    @send_request(method="getCompletions")
+    def get_completions(self, params, *args, **kwargs):
+        logger.info("GET_COMPLETIONS")
+        logger.info(params)
+        sim_params = {
+            "doc": {
+                "source": params["current_word"],
+                "position": {
+                    "line": params["line"],
+                    "character": params["column"]
+                },
+                "insertSpaces": True,
+                "tabSize": 4,
+                "languageId": params["language"],
+                "path": params["file"],
+                "uri": pathlib.Path(params["file"]).as_uri(),
+                "version": params["version"]
+            }
+        }
+        return sim_params
+
+    # @handles("getCompletions")
+    # def handle_get_completions(self, response, *args):
+    #     logger.info("HANDLE_GET_COMPLETIONS")
+    #     logger.info(response)
+
     @send_request(method=CompletionRequestTypes.SHUTDOWN)
     def shutdown(self):
         params = {}
@@ -686,7 +712,7 @@ class LSPClient(QObject, LSPMethodProviderMixIn, SpyderConfigurationAccessor):
         # the configurations set by the user in our config system.
         self.send_configurations(self.configurations)
 
-        # Sign In flow for copilot like servers
+        # Sign In flow for copilot like servers/testing for the moment by registering server as an html server
         if self.language == "html":
             self.sign_in_initiate()
 
