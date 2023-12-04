@@ -666,10 +666,10 @@ class LSPClient(QObject, LSPMethodProviderMixIn, SpyderConfigurationAccessor):
         }
         return sim_params
 
-    # @handles("getCompletions")
-    # def handle_get_completions(self, response, *args):
-    #     logger.info("HANDLE_GET_COMPLETIONS")
-    #     logger.info(response)
+    @handles("getCompletions")
+    def handle_get_completions(self, response, *args):
+        logger.info("HANDLE_GET_COMPLETIONS")
+        logger.info(response)
 
     @send_request(method=CompletionRequestTypes.SHUTDOWN)
     def shutdown(self):
