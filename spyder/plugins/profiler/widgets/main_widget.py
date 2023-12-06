@@ -315,6 +315,10 @@ class ProfilerWidget(PluginMainWidget):
         self.load_action.setEnabled(not self.running)
         self.clear_action.setEnabled(not self.running)
         self.start_action.setEnabled(bool(self.filecombo.currentText()))
+        if self.datatree.find_root():
+            self.stacked_widget.setCurrentWidget(self.datatree)
+        else:
+            self.stacked_widget.setCurrentWidget(self.pane_empty)
 
     # --- Private API
     # ------------------------------------------------------------------------
@@ -345,6 +349,7 @@ class ProfilerWidget(PluginMainWidget):
         self.show_data(justanalyzed=True)
         self.save_action.setEnabled(True)
         self.update_actions()
+        self.sig_finished.emit()
 
     def _read_output(self, error=False):
         """
@@ -579,6 +584,8 @@ class ProfilerWidget(PluginMainWidget):
                 _("Error"),
                 _("Process failed to start"),
             )
+        else:
+            self.sig_started.emit()
         self.update_actions()
 
     def stop(self):
